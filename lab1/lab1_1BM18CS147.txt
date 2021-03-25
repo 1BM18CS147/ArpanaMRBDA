@@ -1,0 +1,176 @@
+cqlsh> CREATE KEYSPACE studentset WITH REPLICATION = { 'class':'SimpleStrategy', 'replication_factor':1};
+cqlsh> DESCRIBE KEYSPACES
+
+students  system_schema  system_auth  system  system_distributed  system_traces
+
+cqlsh> USE studentset
+   ... ;
+cqlsh:studentset> CREATE TABLE studentinfo{
+            ... rollno int PRIMARY KEY,
+            ...dateofjoining timestamp,
+            ... studname text
+            ... };
+
+cqlsh:studentset> DESCRIBE TABLE studentinfo;
+
+CREATE TABLE students.student_info (
+             rollno int PRIMARY KEY,
+            dateofjoining timestamp,
+            studname text
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:studentset>insert into studentinfo(rollno, studname, dateofjoining) values(1,'Rahul manoj','2018-07-22'); 
+cqlsh:studentset>insert into studentinfo(rollno, studname, dateofjoining) values(2,'Ria Kapur','2018-07-23'); 
+cqlsh:studentset>insert into studentinfo(rollno, studname, dateofjoining) values(3,'Dharam Singh','2018-07-23'); 
+cqlsh:studentset> BEGIN BATCH insert into studentinfo(rollno, studname, dateofjoining) values(4,'Sheema A','2018-07-23'); 
+insert into studentinfo(rollno, studname, dateofjoining) values(5,'Abhi Dutt','2018-07-23'); APPLY BATCH
+
+cqlsh:studentset> SELECT * FROM studentinfo;
+
+ rollno | dateofjoining                      | studname
+--------+---------------------------------+-----------------+---------
+      5 | 2018-07-22 18:30:00.000000+0000 |           Abhi Dutt
+      1 | 2018-07-22 18:30:00.000000+0000 |           Rahul manoj
+      2 | 2018-07-23 18:30:00.000000+0000 |           Ria Kapur
+      4 | 2021-07-22 18:30:00.000000+0000 |           Sheema A
+      3 | 2021-07-23 18:30:00.000000+0000 |           Dharam Singh
+(5 rows)
+
+
+cqlsh:studentset> SELECT * FROM studentinfo WHERE rollno IN (5,3,1);
+
+ rollno | dateofjoining                      | studname
+--------+---------------------------------+-----------------+---------
+      1 | 2018-07-22 18:30:00.000000+0000 |           Rahul manoj
+      3 | 2021-07-23 18:30:00.000000+0000 |           Dharam Singh
+      5 | 2018-07-22 18:30:00.000000+0000 |           Abhi Dutt
+
+
+(3 rows)
+cqlsh:studentset> create index on studentinfo(studname);
+cqlsh:studentset> select * from studentinfo where Name='Abhi Dutt';
+
+ rollno | dateofjoin                      |  name
+--------+---------------------------------+-----------------+---------
+      5 | 2018-07-22 18:30:00.000000+0000 |           Abhi Dutt
+
+(1 rows)
+cqlsh:studentset> select * from studentinfo limit 2;
+
+ rollno | dateofjoining                      | studname
+--------+---------------------------------+-----------------+---------
+      5 | 2018-07-22 18:30:00.000000+0000 |           Abhi Dutt
+      1 | 2018-07-22 18:30:00.000000+0000 |           Rahul manoj
+
+(2 rows)
+
+cqlsh:studentset> update studentinfo set studname='David Becham' where rollno=2;
+cqlsh:studentset> SELECT * FROM studentinfo;
+
+ rollno | dateofjoining                      | studname
+--------+---------------------------------+-----------------+---------
+      5 | 2018-07-22 18:30:00.000000+0000 |           Abhi Dutt
+      1 | 2018-07-22 18:30:00.000000+0000 |           Rahul manoj
+      2 | 2018-07-23 18:30:00.000000+0000 |           David Becham
+      4 | 2021-07-22 18:30:00.000000+0000 |           Sheema A
+      3 | 2021-07-23 18:30:00.000000+0000 |           Dharam Singh
+(5 rows)
+
+cqlsh:studentset> delete from studentinfo where Rollno=2;
+cqlsh:studentset> select * FROM studentinfo;
+
+ rollno | dateofjoining                      | studname
+--------+---------------------------------+-----------------+---------
+      5 | 2018-07-22 18:30:00.000000+0000 |           Abhi Dutt
+      1 | 2018-07-22 18:30:00.000000+0000 |           Rahul manoj
+      4 | 2021-07-22 18:30:00.000000+0000 |           Sheema A
+      3 | 2021-07-23 18:30:00.000000+0000 |           Dharam Singh
+(4 rows)
+
+cqlsh:studentset> cd ..
+              ... 
+cqlsh:studentset> exit;
+bmsce@bmsce-Precision-T1700:~/cassandra/apache-cassandra-3.11.0/bin$ cqlsh;
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> create keyspace Lab1_1BM18CS147 with replication={ 'class':'SimpleStrategy','replication_factor':1 };
+cqlsh> use Lab1_1BM18CS147;
+cqlsh:lab1_1bm18cs147> create table project_details( proj_id int, proj_name text, proj_duration int, mentor text, primary key(proj_id,proj_name));
+cqlsh:lab1_1bm18cs147> begin batch insert into project_details(proj_id,proj_name,proj_duration,mentor) values(1,'Swachh app',6,'Ram Kumar'); insert into project_details(proj_id,proj_name,proj_duration,mentor) values(2,'Sleep pattern detector',7,'Sushmita Swaraj'); insert into project_details(proj_id,proj_name,proj_duration,mentor) values(3,'GymItout',4,'Taheer Khan'); insert into project_details(proj_id,proj_name,proj_duration,mentor) values(4,'Traffic detector',4,'Disha Pai'); apply batch;
+cqlsh:lab1_1bm18cs147> select * from project_details;
+
+ proj_id | proj_name              | mentor          | proj_duration
+---------+------------------------+-----------------+---------------
+       1 |             Swachh app |       Ram Kumar |             6
+       2 | Sleep pattern detector | Sushmita Swaraj |             7
+       4 |       Traffic detector |       Disha Pai |             4
+       3 |               GymItout |     Taheer Khan |             4
+
+(4 rows)
+
+cqlsh:lab1_1bm18cs147> create index if not exists name_ind on project_details(mentor);
+cqlsh:lab1_1bm18cs147> select * from project_details where mentor='Ram Kumar';
+
+ proj_id | proj_name  | mentor    | proj_duration
+---------+------------+-----------+---------------
+       1 | Swachh app | Ram Kumar |             6
+
+(1 rows)
+
+cqlsh:lab1_1bm18cs147> select* from project_details where proj_id=1;
+
+ proj_id | proj_name              | mentor          | proj_duration
+---------+------------------------+-----------------+---------------
+       1 |             Swachh app |       Ram Kumar |             6
+
+(1 rows)
+
+cqlsh:lab1_1bm18cs147> update project_details set  proj_duration= 4 where proj_id=1 and proj_name='Swachh app';
+cqlsh:lab1_1bm18cs147> select * from project_details;
+
+ proj_id | proj_name              | mentor          | proj_duration
+---------+------------------------+-----------------+---------------
+       1 |             Swachh app |       Ram Kumar |             4
+       2 | Sleep pattern detector | Sushmita Swaraj |             7
+       4 |       Traffic detector |       Disha Pai |             4
+       3 |               GymItout |     Taheer Khan |             4
+
+(4 rows)
+
+cqlsh:lab1_1bm18cs147> delete proj_duration from project_details where  proj_id=1 and proj_name='Swachh app';
+cqlsh:lab1_1bm18cs147> SELECT * FROM Project_Details;
+
+ proj_id | proj_name              | mentor          | proj_duration
+---------+------------------------+-----------------+---------------
+       1 |             Swachh app |       Ram Kumar |             null
+       2 | Sleep pattern detector | Sushmita Swaraj |             7
+       4 |       Traffic detector |       Disha Pai |             4
+       3 |               GymItout |     Taheer Khan |             4
+
+(4 rows)
+
+cqlsh:lab1_1bm18cs147> delete from project_details where  proj_id=1 and proj_name='Swachh app';
+cqlsh:lab1_1bm18cs147> select * from project_details;
+
+ proj_id | proj_name              | mentor          | proj_duration
+---------+------------------------+-----------------+---------------
+       2 | Sleep pattern detector | Sushmita Swaraj |             7
+       4 |       Traffic detector |       Disha Pai |             4
+       3 |               GymItout |     Taheer Khan |             4
+
+(3 rows)
+
